@@ -72,62 +72,7 @@ export function getRequiredKeypoints(keypoints: Keypoint[]): (Keypoint | null)[]
   );
 }
 
-/**
- * Calculate overall pose quality score (0-1)
- */
-export function calculatePoseQuality(keypoints: Keypoint[]): number {
-  if (!isValidPushUpPose(keypoints)) {
-    return 0;
-  }
 
-  let qualityScore = 0;
-  let factors = 0;
-
-  // Factor 1: Body alignment (shoulders and hips should be level)
-  const leftShoulder = keypoints.find(kp => kp.name === 'left_shoulder');
-  const rightShoulder = keypoints.find(kp => kp.name === 'right_shoulder');
-  const leftHip = keypoints.find(kp => kp.name === 'left_hip');
-  const rightHip = keypoints.find(kp => kp.name === 'right_hip');
-
-  if (leftShoulder && rightShoulder) {
-    const shoulderAlignment = Math.abs(leftShoulder.y - rightShoulder.y);
-    const shoulderScore = Math.max(0, 1 - (shoulderAlignment / CV_FSM_CONFIG.IDEAL_BODY_ALIGNMENT));
-    qualityScore += shoulderScore;
-    factors++;
-  }
-
-  if (leftHip && rightHip) {
-    const hipAlignment = Math.abs(leftHip.y - rightHip.y);
-    const hipScore = Math.max(0, 1 - (hipAlignment / CV_FSM_CONFIG.IDEAL_BODY_ALIGNMENT));
-    qualityScore += hipScore;
-    factors++;
-  }
-
-  // Factor 2: Elbow angles should be within ideal range
-  const leftElbowAngle = calculateElbowAngle(keypoints, 'left');
-  const rightElbowAngle = calculateElbowAngle(keypoints, 'right');
-
-  if (leftElbowAngle !== null) {
-    const inRange = leftElbowAngle >= CV_FSM_CONFIG.ELBOW_ANGLE_RANGE[0] && 
-                   leftElbowAngle <= CV_FSM_CONFIG.ELBOW_ANGLE_RANGE[1];
-    qualityScore += inRange ? 1 : 0.5;
-    factors++;
-  }
-
-  if (rightElbowAngle !== null) {
-    const inRange = rightElbowAngle >= CV_FSM_CONFIG.ELBOW_ANGLE_RANGE[0] && 
-                   rightElbowAngle <= CV_FSM_CONFIG.ELBOW_ANGLE_RANGE[1];
-    qualityScore += inRange ? 1 : 0.5;
-    factors++;
-  }
-
-  // Factor 3: Confidence scores
-  const avgConfidence = keypoints.reduce((sum, kp) => sum + kp.confidence, 0) / keypoints.length;
-  qualityScore += avgConfidence;
-  factors++;
-
-  return factors > 0 ? qualityScore / factors : 0;
-}
 
 /**
  * Detect movement direction between two poses

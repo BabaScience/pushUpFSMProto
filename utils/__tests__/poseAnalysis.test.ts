@@ -2,7 +2,6 @@ import { CV_FSM_CONFIG } from '../../constants/poseConfig';
 import type { Keypoint, PoseData } from '../../types';
 import {
     calculateElbowAngle,
-    calculatePoseQuality,
     calculateVerticalDisplacement,
     detectMovementDirection,
     getRequiredKeypoints,
@@ -172,33 +171,7 @@ describe('poseAnalysis', () => {
     });
   });
 
-  describe('calculatePoseQuality', () => {
-    test('should return high quality score for good pose', () => {
-      const keypoints = createMockKeypoints();
-      const quality = calculatePoseQuality(keypoints);
-      
-      expect(quality).toBeGreaterThan(0.7);
-      expect(quality).toBeLessThanOrEqual(1.0);
-    });
 
-    test('should return lower quality score for poor pose alignment', () => {
-      const keypoints = createMockKeypoints({
-        left_shoulder: { x: 50, y: 100 }, // Misaligned shoulders
-        right_shoulder: { x: 250, y: 120 },
-      });
-      
-      const quality = calculatePoseQuality(keypoints);
-      expect(quality).toBeLessThan(0.8);
-    });
-
-    test('should return 0 for invalid pose', () => {
-      const keypoints = createMockKeypoints();
-      const incompleteKeypoints = keypoints.filter(kp => kp.name !== 'left_shoulder');
-      
-      const quality = calculatePoseQuality(incompleteKeypoints);
-      expect(quality).toBe(0);
-    });
-  });
 
   describe('detectMovementDirection', () => {
     test('should detect downward movement', () => {

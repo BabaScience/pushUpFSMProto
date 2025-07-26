@@ -1,7 +1,8 @@
 import { CV_FSM_CONFIG } from '../constants/poseConfig';
 import { PushUpState, type PoseData } from '../types';
+import { formScoring } from './formScoring';
 import { calculateBodyAngle } from './geometryUtils';
-import { calculatePoseQuality, detectMovementDirection, isValidPushUpPose } from './poseAnalysis';
+import { detectMovementDirection, isValidPushUpPose } from './poseAnalysis';
 
 export interface FSMResult {
   currentState: PushUpState;
@@ -22,6 +23,7 @@ export class PushUpFSM {
   private previousPose: PoseData | null = null;
   private setupPose: PoseData | null = null;
   private bottomPose: PoseData | null = null;
+  private poseHistory: PoseData[] = [];
 
   constructor() {
     this.reset();
@@ -31,6 +33,12 @@ export class PushUpFSM {
     const previousState = this.currentState;
     this.previousPose = this.currentPose;
     this.currentPose = pose;
+    
+    // Add to pose history (keep last 30 poses for smoothness analysis)
+    this.poseHistory.push(pose);
+    if (this.poseHistory.length > 30) {
+      this.poseHistory.shift();
+    }
 
     // Check for timeout first
     if (this.hasStateTimedOut()) {
@@ -46,8 +54,8 @@ export class PushUpFSM {
       this.stateStartTime = Date.now();
     }
 
-    const formQuality = calculatePoseQuality(pose.keypoints);
-    const formFeedback = this.generateFormFeedback(pose);
+    const formQuality = formScoring.calculateOverallFormQuality(pose, this.poseHistory);
+    const formFeedback = [formScoring.generateFormFeedback(pose, this.poseHistory)];
 
     return {
       currentState: this.currentState,
@@ -185,16 +193,16 @@ export class PushUpFSM {
   }
 
   private isValidRep(pose: PoseData): boolean {
-    const formQuality = calculatePoseQuality(pose.keypoints);
+    const formQuality = formScoring.calculateOverallFormQuality(pose, this.poseHistory);
     return formQuality > 0.6; // Minimum form quality threshold
   }
 
   private generateFormFeedback(pose: PoseData): string[] {
     const feedback: string[] = [];
-    const formQuality = calculatePoseQuality(pose.keypoints);
-
-    if (formQuality < 0.7) {
-      feedback.push('Focus on form quality');
+    const formFeedback = formScoring.generateFormFeedback(pose, this.poseHistory);
+    
+    if (formFeedback && formFeedback.length > 0) {
+      feedback.push(formFeedback);
     }
 
     if (!isValidPushUpPose(pose.keypoints)) {
@@ -231,5 +239,6 @@ export class PushUpFSM {
     this.previousPose = null;
     this.setupPose = null;
     this.bottomPose = null;
+    this.poseHistory = [];
   }
 } 
