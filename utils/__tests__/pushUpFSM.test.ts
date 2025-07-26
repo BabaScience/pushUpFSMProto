@@ -1,6 +1,6 @@
-import { CV_FSM_CONFIG } from '../constants/poseConfig';
-import { PushUpState, type Keypoint, type PoseData } from '../types';
-import { PushUpFSM } from './pushUpFSM';
+import { CV_FSM_CONFIG } from '../../constants/poseConfig';
+import { PushUpState, type Keypoint, type PoseData } from '../../types';
+import { PushUpFSM } from '../pushUpFSM';
 
 describe('PushUpFSM', () => {
   let fsm: PushUpFSM;

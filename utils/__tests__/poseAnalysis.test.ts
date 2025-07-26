@@ -1,5 +1,5 @@
-import { CV_FSM_CONFIG } from '../constants/poseConfig';
-import type { Keypoint, PoseData } from '../types';
+import { CV_FSM_CONFIG } from '../../constants/poseConfig';
+import type { Keypoint, PoseData } from '../../types';
 import {
     calculateElbowAngle,
     calculatePoseQuality,
@@ -7,7 +7,7 @@ import {
     detectMovementDirection,
     getRequiredKeypoints,
     isValidPushUpPose,
-} from './poseAnalysis';
+} from '../poseAnalysis';
 
 describe('poseAnalysis', () => {
   const createMockKeypoints = (overrides: Partial<Record<string, Partial<Keypoint>>> = {}): Keypoint[] => {

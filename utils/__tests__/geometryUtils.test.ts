@@ -1,5 +1,5 @@
-import type { Keypoint } from '../types';
-import { calculateAngle, calculateBodyAngle, calculateDistance, normalizeCoordinates } from './geometryUtils';
+import type { Keypoint } from '../../types';
+import { calculateAngle, calculateBodyAngle, calculateDistance, normalizeCoordinates } from '../geometryUtils';
 
 describe('geometryUtils', () => {
   const mockKeypoint1: Keypoint = { x: 0, y: 0, confidence: 0.9, name: 'point1' };
@@ -8,8 +8,16 @@ describe('geometryUtils', () => {
 
   describe('calculateDistance', () => {
     test('should calculate distance between two points', () => {
-      const distance = calculateDistance(mockKeypoint1, mockKeypoint2);
-      expect(distance).toBe(100);
+      const distance1 = calculateDistance(mockKeypoint1, mockKeypoint2);
+      const distance2 = calculateDistance(mockKeypoint2, mockKeypoint1);
+      const distance3 = calculateDistance(mockKeypoint1, mockKeypoint1);
+      const distance4 = calculateDistance(mockKeypoint1, mockKeypoint3);
+      const distance5 = calculateDistance(mockKeypoint2, mockKeypoint3);
+      expect(distance1).toBe(100);
+      expect(distance2).toBe(100);
+      expect(distance3).toBe(0);
+      expect(distance4).toBe(70.71067811865476);
+      expect(distance5).toBe(70.71067811865476);
     });
 
     test('should calculate diagonal distance correctly', () => {
@@ -17,6 +25,13 @@ describe('geometryUtils', () => {
       const point2 = { x: 3, y: 4, confidence: 0.9, name: 'p2' };
       const distance = calculateDistance(point1, point2);
       expect(distance).toBe(5);
+    });
+
+    test('should calculate distance between two points with negative coordinates', () => {
+      const point1 = { x: -100, y: -100, confidence: 0.9, name: 'p1' };
+      const point2 = { x: -200, y: -200, confidence: 0.9, name: 'p2' };
+      const distance = calculateDistance(point1, point2);
+      expect(distance).toBe(141.4213562373095);
     });
 
     test('should return 0 for same point', () => {
