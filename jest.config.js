@@ -17,9 +17,12 @@ module.exports = {
     'utils/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',
     'services/**/*.{ts,tsx}',
-    'components/**/*.{ts,tsx}',
+    'types/**/*.{ts,tsx}',
+    'constants/**/*.{ts,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
+    '!**/__tests__/**',
+    '!**/test/**',
   ],
   coverageThreshold: {
     global: {
